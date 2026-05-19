@@ -98,13 +98,22 @@ const yearlyInsightsData: YearlyInsight[] = [
     words: ["평강", "영광", "소망", "승리"],
     tone: { petition: 10, tuning: 20, trust: 70 },
     description: "신앙 여정의 완성을 바라보는 영원한 소망과 영광의 해입니다. 이 땅의 나그네 여정 속에서 이미 승리하신 그리스도의 영광을 묵상하고, 선한 싸움을 마친 후 주어질 하늘의 안식을 갈망합니다. 기도의 70% 이상이 오직 하나님의 선하심에 삶과 미래를 온전히 위탁(Trust)하는 초연한 신뢰로 채워졌습니다."
+  },
+  {
+    year: "2026년",
+    slogan: "텍스트(Text)를 삶의 콘텍스트(Context)로 번역하는 순종",
+    theme: "말씀의 창조적 질서 회복과 일상적 나그네 대접",
+    scriptures: ["창세기", "마태복음", "야고보서"],
+    words: ["텍스트", "콘텍스트", "순종", "질서"],
+    tone: { petition: 10, tuning: 15, trust: 75 },
+    description: "오랜 시간 쌓아온 영적 수동성의 결실이 구체적인 삶의 환경(콘텍스트) 속에서 하나님의 텍스트(말씀)로 실천되는 해입니다. 창조의 질서와 에덴의 타락을 깊이 묵상하며, 스스로의 힘으로 높이 쌓으려는 바벨탑 문화에 휩쓸리지 않고, 허물을 덮어주고 나그네를 종의 자세로 대접하는 일상적 순종에 천착합니다. 아는 지식에 머물지 않고 일상의 한 조각조차 거룩한 예배가 되도록 삶을 주님께 전적으로 위탁합니다."
   }
 ];
 
 export default function InsightsPage() {
-  const [selectedYear, setSelectedYear] = useState<string>("2024년");
+  const [selectedYear, setSelectedYear] = useState<string>("2026년");
 
-  const currentInsight = yearlyInsightsData.find(item => item.year === selectedYear) || yearlyInsightsData[7];
+  const currentInsight = yearlyInsightsData.find(item => item.year === selectedYear) || yearlyInsightsData[yearlyInsightsData.length - 1];
 
   return (
     <div className="p-6 md:p-12 lg:p-16 w-full max-w-[1400px] mx-auto">
@@ -172,7 +181,7 @@ export default function InsightsPage() {
               <div className="relative">
                 <span className="absolute -left-[31px] top-0 flex items-center justify-center w-5 h-5 rounded-full bg-purple-50 text-[10px] font-bold text-purple-600 animate-pulse">4</span>
                 <div>
-                  <span className="text-xs font-bold text-purple-600 uppercase tracking-wider block">2024 ~ 2025+</span>
+                  <span className="text-xs font-bold text-purple-600 uppercase tracking-wider block">2024 ~ 2026+</span>
                   <h3 className="text-[15px] font-bold text-[#37352f] mt-1">수동성기: 자기 비움과 절대 평강</h3>
                   <p className="text-sm text-[#787774] mt-1.5 leading-relaxed">
                     자신의 힘을 모두 비워 온전히 내맡김으로써 주님의 평강에 완전히 안착하는 **영적 수동성(Spiritual Passivity)**의 절정을 고백하는 복된 계절입니다.
@@ -206,7 +215,7 @@ export default function InsightsPage() {
           <div className="bg-white border border-[#e9e9e7] rounded-3xl p-6 md:p-8 shadow-sm flex flex-col">
             <div className="flex flex-col md:flex-row md:items-center justify-between border-b border-[#f2f2f0] pb-4 mb-6 gap-4">
               <h2 className="text-lg font-bold text-[#37352f] flex items-center gap-2">
-                <Calendar size={20} className="text-[#37352f]" /> 연도별 상세 분석 리포트
+                <Calendar size={20} className="text-[#37352f]" /> 연도별 상세 분석
               </h2>
               
               {/* Year Selectors */}
