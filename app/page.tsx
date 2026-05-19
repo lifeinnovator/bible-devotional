@@ -23,12 +23,12 @@ export default async function Home() {
             <div className="absolute top-0 left-0 w-1.5 h-full bg-[#2383e2]" />
             <div className="flex flex-col sm:flex-row sm:items-baseline sm:justify-between gap-2 mb-2.5">
               <blockquote className="text-base md:text-[17px] font-bold text-[#37352f] italic leading-relaxed">
-                “여호와를 경외하는 것이 지혜의 근본이요<br /> 거룩하신 자를 아는 것이 명철이니라”
+                “여호와를 경외하는 것이 지혜의 근본이요<br className="md:hidden" /> 거룩하신 자를 아는 것이 명철이니라”
               </blockquote>
               <span className="text-[13px] font-semibold text-[#9b9a97] shrink-0">— 잠언 9:10</span>
             </div>
             <p className="text-[#787774] text-[13px] leading-relaxed pt-2.5 border-t border-[#e9e9e7]/60">
-              2017년 6월 24일부터 지금까지 기록된 <strong className="text-[#37352f] font-semibold">{totalDays.toLocaleString()}일</strong>의 아침은 장로님께서 하나님과 독대한 거룩한 여정의 흔적입니다.
+              2017년 6월 24일부터 지금까지 기록된 {totalDays.toLocaleString()}일의 아침은 장로님께서 하나님과 독대한 거룩한 여정의 흔적입니다.
             </p>
           </div>
         </header>
