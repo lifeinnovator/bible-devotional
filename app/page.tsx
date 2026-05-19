@@ -22,8 +22,8 @@ export default async function Home() {
           <div className="bg-[#fbfbfa] border border-[#e9e9e7] rounded-xl p-4 md:p-5 relative overflow-hidden shadow-sm">
             <div className="absolute top-0 left-0 w-1.5 h-full bg-[#2383e2]" />
             <div className="flex flex-col sm:flex-row sm:items-baseline sm:justify-between gap-2 mb-2.5">
-              <blockquote className="text-base md:text-[17px] font-bold text-[#37352f] italic">
-                “여호와를 경외하는 것이 지혜의 근본이요 거룩하신 자를 아는 것이 명철이니라”
+              <blockquote className="text-base md:text-[17px] font-bold text-[#37352f] italic leading-relaxed">
+                “여호와를 경외하는 것이 지혜의 근본이요<br /> 거룩하신 자를 아는 것이 명철이니라”
               </blockquote>
               <span className="text-[13px] font-semibold text-[#9b9a97] shrink-0">— 잠언 9:10</span>
             </div>
