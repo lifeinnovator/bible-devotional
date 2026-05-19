@@ -28,7 +28,7 @@ export default async function Home() {
               <span className="text-[13px] font-semibold text-[#9b9a97] shrink-0">— 잠언 9:10</span>
             </div>
             <p className="text-[#787774] text-[13px] leading-relaxed pt-2.5 border-t border-[#e9e9e7]/60">
-              지금까지 기록된 <strong className="text-[#37352f] font-semibold">{totalDays.toLocaleString()}일</strong>의 아침은 장로님께서 하나님과 독대한 거룩한 여정의 흔적입니다.
+              2017년 6월 24일부터 지금까지 기록된 <strong className="text-[#37352f] font-semibold">{totalDays.toLocaleString()}일</strong>의 아침은 장로님께서 하나님과 독대한 거룩한 여정의 흔적입니다.
             </p>
           </div>
         </header>
