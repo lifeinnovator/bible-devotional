@@ -18,14 +18,18 @@ export default async function Home() {
   return (
     <div className="p-6 md:p-12 lg:p-16 w-full max-w-[1400px] mx-auto">
       <div>
-        <header className="mb-12">
-          <div className="flex items-center gap-3 mb-4">
-              <h1 className="text-3xl font-bold m-0 text-[#37352f] tracking-tight">평안하신지요, 장로님</h1>
-            </div>
-            <p className="text-[#787774] text-[17px] leading-relaxed">
-              지금까지 기록된 <strong className="text-[#37352f] font-semibold">{totalDays.toLocaleString()}일</strong>의 아침은 장로님께서 하나님과 독대한 거룩한 시간들입니다.
+        <header className="mb-12 animate-fade-in">
+          <div className="bg-[#fbfbfa] border border-[#e9e9e7] rounded-2xl p-6 md:p-8 relative overflow-hidden shadow-sm">
+            <div className="absolute top-0 left-0 w-1.5 h-full bg-[#2383e2]" />
+            <blockquote className="text-lg md:text-xl font-bold text-[#37352f] leading-relaxed mb-4 italic">
+              “여호와를 경외하는 것이 지혜의 근본이요<br className="hidden md:inline" /> 거룩하신 자를 아는 것이 명철이니라”
+              <span className="block mt-2 text-sm font-semibold text-[#9b9a97] not-italic">— 잠언 9:10</span>
+            </blockquote>
+            <p className="text-[#787774] text-[14px] leading-relaxed mt-4 pt-4 border-t border-[#e9e9e7]/80">
+              지금까지 기록된 <strong className="text-[#37352f] font-semibold">{totalDays.toLocaleString()}일</strong>의 아침은 장로님께서 하나님과 독대한 거룩한 여정의 흔적입니다.
             </p>
-          </header>
+          </div>
+        </header>
 
 
 
