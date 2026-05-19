@@ -207,3 +207,62 @@ export async function saveMeditation(meditation: {
     return { success: false, error: String(error) };
   }
 }
+
+export async function updateMeditation(meditation: {
+  date: string;
+  bible_book: string;
+  title: string;
+  scripture: string;
+  reflection: string;
+  prayer: string;
+}) {
+  try {
+    let book = meditation.bible_book || "";
+    if (!book && meditation.title) {
+      const match = meditation.title.match(/^([가-힣\s]+)\s*\d+/);
+      if (match) {
+        const canonical = getCanonicalBook(match[1]);
+        if (canonical) book = canonical;
+      }
+    }
+
+    await turso.execute({
+      sql: "UPDATE meditations SET bible_book = ?, title = ?, scripture = ?, reflection = ?, prayer = ? WHERE date = ?",
+      args: [
+        book,
+        meditation.title,
+        meditation.scripture,
+        meditation.reflection,
+        meditation.prayer,
+        meditation.date
+      ]
+    });
+    
+    revalidatePath('/');
+    revalidatePath('/bookshelf');
+    revalidatePath('/search');
+    
+    return { success: true };
+  } catch (error) {
+    console.error("Error updating meditation:", error);
+    return { success: false, error: String(error) };
+  }
+}
+
+export async function deleteMeditation(date: string) {
+  try {
+    await turso.execute({
+      sql: "DELETE FROM meditations WHERE date = ?",
+      args: [date]
+    });
+    
+    revalidatePath('/');
+    revalidatePath('/bookshelf');
+    revalidatePath('/search');
+    
+    return { success: true };
+  } catch (error) {
+    console.error("Error deleting meditation:", error);
+    return { success: false, error: String(error) };
+  }
+}
