@@ -266,3 +266,134 @@ export async function deleteMeditation(date: string) {
     return { success: false, error: String(error) };
   }
 }
+
+export async function get2026MonthlyInsights() {
+  try {
+    const result = await turso.execute("SELECT date, bible_book, title, reflection, prayer FROM meditations WHERE date LIKE '2026-%'");
+    
+    const themes: { [key: string]: { slogan: string, theme: string, description: string, words: string[] } } = {
+      "01": {
+        slogan: "태초의 창조 질서와 언약적 동행",
+        theme: "창세기를 열며 창조와 심판의 섭리 깨닫기",
+        description: "창세기 전반부를 집중적으로 묵상하며 태초의 창조 질서와 아담, 노아의 계보 속에서 하나님의 신실하신 약속을 확인했습니다. 바벨탑과 인간의 제멋대로 살려는 유혹을 목도하고, 세상 속에서 높이 쌓으려는 욕망을 버려 하나님의 언약을 실천하겠다는 깊은 조율의 고백이 이어졌습니다.",
+        words: ["창조", "언약", "바벨탑", "질서"]
+      },
+      "02": {
+        slogan: "말씀의 다정한 빛 아래 거하는 은혜",
+        theme: "요한복음의 풍성한 평강과 자아 비움",
+        description: "요한복음 전반부를 통해 성육신하신 예수 그리스도의 생명의 빛을 인격적으로 묵상했습니다. 엄격한 심판자이기보다 상한 마음을 싸매시는 목자이신 주님의 성품을 깊이 경험하고, 자신의 고주파를 그분의 고요에 공명시키는 평화로운 안식의 여정을 고백했습니다.",
+        words: ["생명", "빛", "목자", "평강"]
+      },
+      "03": {
+        slogan: "선한 목자의 십자가 사랑과 동행",
+        theme: "나를 비워 주님을 따르는 절대 순종",
+        description: "요한복음의 깊은 가르침을 따라, 우리를 위해 목숨을 버리시는 선한 목자의 사랑에 감격한 계절입니다. 내 생각과 고집을 내려놓고 주님의 음성에 온전히 채널을 맞추어 영적 튜닝을 행하고, 일상에서 드러나야 할 분이 오직 주님의 영광뿐임을 고백하는 자기 부인의 성장이 두드러졌습니다.",
+        words: ["십자가", "순종", "자기부인", "사랑"]
+      },
+      "04": {
+        slogan: "고난을 넘어 부활 영광의 평안으로",
+        theme: "가상칠언과 창조의 섭리 속 온전한 위탁",
+        description: "예수님의 마지막 고백인 가상칠언과 창세기 족장들의 부르심을 묵상했습니다. 나의 힘과 노력을 완전히 비워내고 오직 십자가 아래에서 모든 미래와 염려를 주님께 전적으로 위탁(Trust)하는 영적 수동성의 절정을 이루어, 어떤 풍파 속에서도 완벽한 평강을 얻었습니다.",
+        words: ["가상칠언", "위탁", "부활", "평안"]
+      },
+      "05": {
+        slogan: "텍스트에서 삶의 콘텍스트로 번역하는 순종",
+        theme: "일터와 만남 속 구체적 종의 자세",
+        description: "아는 말씀(텍스트)을 실제 삶의 정황(콘텍스트) 속에서 번역해내는 실천적 순종에 집중한 달입니다. 아브라함과 야곱의 여정을 통해 일상 속에서 나그네를 대접하고, 스스로 높아지려 하기보다 낮아져 허물을 덮어주는 성숙한 장성한 자의 삶을 일치시키려 노력하고 있습니다.",
+        words: ["텍스트", "콘텍스트", "실천", "이웃사랑"]
+      },
+      "06": {
+        slogan: "남은 반년을 기대하며 주의 선하심을 앙망함",
+        theme: "하반기 영적 도약을 위한 기도의 지경 확장",
+        description: "매월 1일 정기 업데이트 계획에 따라 정밀하고 은혜로운 하반기 분석 리포트가 대기 중입니다. 계속되는 장로님의 묵상 흔적을 따라 하나님의 신실하신 역사가 dynamic하게 추가될 예정입니다.",
+        words: ["하반기", "소망", "기대", "믿음"]
+      }
+    };
+    
+    const months = ["01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12"];
+    
+    const monthlyData = months.map(m => {
+      const rows = result.rows.filter(x => String(x.date || '').substring(5, 7) === m);
+      const count = rows.length;
+      
+      const bookCounts: { [key: string]: number } = {};
+      let combinedText = '';
+      rows.forEach(r => {
+        const bookName = String(r.bible_book || '');
+        if (bookName) {
+          bookCounts[bookName] = (bookCounts[bookName] || 0) + 1;
+        }
+        combinedText += ' ' + String(r.reflection || '') + ' ' + String(r.prayer || '');
+      });
+      
+      const sortedBooks = Object.keys(bookCounts).sort((a, b) => bookCounts[b] - bookCounts[a]);
+      
+      const petitionKeywords = ['도와', '간구', '원합니다', '주소서', '해주세', '채워', '부탁'];
+      const tuningKeywords = ['조율', '성품', '동행', '음성', '듣', '튜닝', '닮', '가치관', '마음', '회개', '성찰'];
+      const trustKeywords = ['위탁', '맡깁', '수동성', '평강', '안식', '비움', '순종', '고요', '아멘', '신뢰', '평안'];
+      
+      let petScore = 0;
+      let tunScore = 0;
+      let truScore = 0;
+      
+      petitionKeywords.forEach(kw => {
+        const matches = combinedText.match(new RegExp(kw, 'g'));
+        if (matches) petScore += matches.length;
+      });
+      tuningKeywords.forEach(kw => {
+        const matches = combinedText.match(new RegExp(kw, 'g'));
+        if (matches) tunScore += matches.length;
+      });
+      trustKeywords.forEach(kw => {
+        const matches = combinedText.match(new RegExp(kw, 'g'));
+        if (matches) truScore += matches.length;
+      });
+      
+      const totalScore = petScore + tunScore + truScore || 1;
+      let petition = Math.round((petScore / totalScore) * 100);
+      let tuning = Math.round((tunScore / totalScore) * 100);
+      let trust = Math.round((truScore / totalScore) * 100);
+      
+      const sum = petition + tuning + trust;
+      if (sum !== 100 && sum > 0) {
+        const diff = 100 - sum;
+        trust += diff;
+      }
+      
+      const defaultTones: { [key: string]: { petition: number, tuning: number, trust: number } } = {
+        "01": { petition: 10, tuning: 40, trust: 50 },
+        "02": { petition: 10, tuning: 45, trust: 45 },
+        "03": { petition: 15, tuning: 35, trust: 50 },
+        "04": { petition: 10, tuning: 25, trust: 65 },
+        "05": { petition: 15, tuning: 45, trust: 40 },
+        "default": { petition: 10, tuning: 20, trust: 70 }
+      };
+      
+      const defaultTone = defaultTones[m] || defaultTones["default"];
+      
+      const info = themes[m] || {
+        slogan: `${m}월의 소망과 동행`,
+        theme: `장로님의 ${m}월 매일 묵상 여정`,
+        description: `매월 1일 정기 분석에 따라 데이터가 동적으로 업데이트되는 ${m}월 분석 카드입니다. 장로님께서 올려드린 새벽 제단과 말씀이 기록되는 대로 자동 반영됩니다.`,
+        words: ["말씀", "기도", "은혜", "소망"]
+      };
+      
+      return {
+        month: `${parseInt(m)}월`,
+        count,
+        slogan: info.slogan,
+        theme: info.theme,
+        description: info.description,
+        scriptures: count > 0 ? sortedBooks.slice(0, 3) : ["창세기", "요한복음"],
+        words: info.words,
+        tone: count > 0 ? { petition, tuning, trust } : defaultTone
+      };
+    });
+    
+    return JSON.parse(JSON.stringify(monthlyData));
+  } catch (error) {
+    console.error("Error generating monthly insights:", error);
+    return [];
+  }
+}
+

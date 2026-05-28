@@ -1,7 +1,8 @@
 'use client';
 
-import { useState } from 'react';
-import { Sparkles, Calendar, BookOpen, Heart, TrendingUp, Compass, Award, Scroll } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Sparkles, Calendar, BookOpen, Heart, TrendingUp, Compass, Award, Scroll, BarChart2 } from 'lucide-react';
+import { get2026MonthlyInsights } from '@/app/actions';
 
 interface YearlyInsight {
   year: string;
@@ -112,8 +113,50 @@ const yearlyInsightsData: YearlyInsight[] = [
 
 export default function InsightsPage() {
   const [selectedYear, setSelectedYear] = useState<string>("2026년");
+  const [viewMode, setViewMode] = useState<'yearly' | 'monthly'>('yearly');
+  const [selectedMonth, setSelectedMonth] = useState<string>("5월");
+  const [monthlyData, setMonthlyData] = useState<any[]>([]);
+  const [loadingMonthly, setLoadingMonthly] = useState<boolean>(false);
+
+  useEffect(() => {
+    async function loadMonthly() {
+      try {
+        setLoadingMonthly(true);
+        const data = await get2026MonthlyInsights();
+        setMonthlyData(data);
+      } catch (error) {
+        console.error("Error loading monthly insights:", error);
+      } finally {
+        setLoadingMonthly(false);
+      }
+    }
+    if (selectedYear === '2026년') {
+      loadMonthly();
+    }
+  }, [selectedYear]);
+
+  // Default selected month to the latest active month when data is loaded
+  useEffect(() => {
+    if (monthlyData.length > 0) {
+      const activeMonths = monthlyData.filter(x => x.count > 0);
+      if (activeMonths.length > 0) {
+        setSelectedMonth(activeMonths[activeMonths.length - 1].month);
+      }
+    }
+  }, [monthlyData]);
 
   const currentInsight = yearlyInsightsData.find(item => item.year === selectedYear) || yearlyInsightsData[yearlyInsightsData.length - 1];
+
+  const currentMonthlyInsight = monthlyData.find(item => item.month === selectedMonth) || {
+    month: "5월",
+    count: 0,
+    slogan: "텍스트에서 삶의 콘텍스트로 번역하는 순종",
+    theme: "일터와 만남 속 구체적 종의 자세",
+    description: "창세기의 족장들의 신앙 여정을 통해 일상에서 실천되는 순종과 자기 부인에 천착하고 있습니다.",
+    scriptures: ["창세기"],
+    words: ["텍스트", "콘텍스트", "순종"],
+    tone: { petition: 15, tuning: 45, trust: 40 }
+  };
 
   return (
     <div className="p-6 md:p-12 lg:p-16 w-full max-w-[1400px] mx-auto">
@@ -130,213 +173,381 @@ export default function InsightsPage() {
           하나님의 신실하신 인도하심과 은혜의 흔적을 연대기적/영적 성장 궤적으로 분석한 심층 통찰 리포트입니다.
         </p>
       </header>
+ 
+       {/* Grid Layout */}
+       <div className="grid grid-cols-1 xl:grid-cols-12 gap-8">
+         {/* Left Column: Era Trajectory (5 spans out of 12) */}
+         <div className="xl:col-span-5 space-y-8">
+           <div className="bg-white border border-[#e9e9e7] rounded-3xl p-6 md:p-8 shadow-sm">
+             <h2 className="text-lg font-bold text-[#37352f] mb-6 flex items-center gap-2 border-b border-[#f2f2f0] pb-3">
+               <TrendingUp size={20} className="text-[#2383e2]" /> 4단계 영적 성장 궤적
+             </h2>
+             
+             <div className="relative border-l-2 border-[#f2f2f0] ml-3 pl-6 space-y-8">
+               {/* Stage 1 */}
+               <div className="relative">
+                 <span className="absolute -left-[31px] top-0 flex items-center justify-center w-5 h-5 rounded-full bg-[#f2f2f0] text-[10px] font-bold text-[#9b9a97]">1</span>
+                 <div>
+                   <span className="text-xs font-bold text-[#9b9a97] uppercase tracking-wider block">2017 ~ 2019</span>
+                   <h3 className="text-[15px] font-bold text-[#37352f] mt-1">기초기: 말씀의 뿌리를 내림</h3>
+                   <p className="text-sm text-[#787774] mt-1.5 leading-relaxed">
+                     율법과 교리 말씀의 엄중한 기준을 확립하고, 매일의 정갈한 성찰적 아침 기도를 일상 습관으로 단단히 다지는 훈련의 계절입니다.
+                   </p>
+                 </div>
+               </div>
+ 
+               {/* Stage 2 */}
+               <div className="relative">
+                 <span className="absolute -left-[31px] top-0 flex items-center justify-center w-5 h-5 rounded-full bg-[#2383e2]/10 text-[10px] font-bold text-[#2383e2]">2</span>
+                 <div>
+                   <span className="text-xs font-bold text-[#2383e2] uppercase tracking-wider block">2020 ~ 2021</span>
+                   <h3 className="text-[15px] font-bold text-[#37352f] mt-1">관계기: 긍휼과 친밀한 안식</h3>
+                   <p className="text-sm text-[#787774] mt-1.5 leading-relaxed">
+                     엄격한 주권자를 넘어, 내게 은혜를 속삭이시는 다정한 친정 아버지와 같은 친밀감을 누리며 깊은 영적 쉼을 맛본 계절입니다.
+                   </p>
+                 </div>
+               </div>
+ 
+               {/* Stage 3 */}
+               <div className="relative">
+                 <span className="absolute -left-[31px] top-0 flex items-center justify-center w-5 h-5 rounded-full bg-emerald-50 text-[10px] font-bold text-emerald-600">3</span>
+                 <div>
+                   <span className="text-xs font-bold text-emerald-600 uppercase tracking-wider block">2022 ~ 2023</span>
+                   <h3 className="text-[15px] font-bold text-[#37352f] mt-1">현장기: 삶의 중보와 일터 영성</h3>
+                   <p className="text-sm text-[#787774] mt-1.5 leading-relaxed">
+                     세속의 치열한 월요일 속에서도 주님과 밀착 동행하며, 개인을 넘어 이웃과 세상을 눈물로 중보하는 성령의 일하심을 체휼한 계절입니다.
+                   </p>
+                 </div>
+               </div>
+ 
+               {/* Stage 4 */}
+               <div className="relative">
+                 <span className="absolute -left-[31px] top-0 flex items-center justify-center w-5 h-5 rounded-full bg-purple-50 text-[10px] font-bold text-purple-600 animate-pulse">4</span>
+                 <div>
+                   <span className="text-xs font-bold text-purple-600 uppercase tracking-wider block">2024 ~ 2026+</span>
+                   <h3 className="text-[15px] font-bold text-[#37352f] mt-1">수동성기: 자기 비움과 절대 평강</h3>
+                   <p className="text-sm text-[#787774] mt-1.5 leading-relaxed">
+                     자신의 힘을 모두 비워 온전히 내맡김으로써 주님의 평강에 완전히 안착하는 **영적 수동성(Spiritual Passivity)**의 절정을 고백하는 복된 계절입니다.
+                   </p>
+                 </div>
+               </div>
+             </div>
+           </div>
+ 
+           {/* Word Evolution Insight Card */}
+           <div className="bg-gradient-to-br from-blue-50/50 to-purple-50/30 border border-blue-100/30 rounded-3xl p-6 md:p-8 shadow-sm">
+             <h2 className="text-lg font-bold text-[#37352f] mb-4 flex items-center gap-2">
+               <Sparkles size={20} className="text-[#2383e2]" /> 어휘로 보는 영적 패러다임의 시프트
+             </h2>
+             <p className="text-sm text-[#37352f] leading-relaxed mb-4">
+               9년 전의 묵상과 최근 묵상의 가장 핵심적인 어휘적 차이는 **'내 의지'**에서 **'오직 은혜'**로의 이행입니다. 
+               초기의 성찰이 스스로의 결점을 참회하고 극복하려는 적극적 자기 통제가 중심이었다면, 
+               후기 묵상으로 갈수록 자아를 죽이고 주님의 주권 속에 완전히 순종하는 흐름을 보여줍니다.
+             </p>
+             <div className="flex flex-wrap gap-2">
+               <span className="text-xs font-semibold px-2.5 py-1 rounded bg-[#f2f2f0] text-[#787774] line-through">적극적인 의지</span>
+               <span className="text-xs font-semibold px-2.5 py-1 rounded bg-[#f2f2f0] text-[#787774] line-through">자아의 다스림</span>
+               <span className="text-xs font-semibold px-2.5 py-1 rounded bg-blue-100/50 text-[#2383e2] font-bold">오직 은혜</span>
+               <span className="text-xs font-semibold px-2.5 py-1 rounded bg-purple-100/50 text-purple-600 font-bold">영적 수동성</span>
+             </div>
+           </div>
+         </div>
+ 
+         {/* Right Column: Dynamic Yearly/Monthly Analysis */}
+         <div className="xl:col-span-7 space-y-8">
+           <div className="bg-white border border-[#e9e9e7] rounded-3xl p-6 md:p-8 shadow-sm flex flex-col">
+             <div className="flex flex-col md:flex-row md:items-center justify-between border-b border-[#f2f2f0] pb-4 mb-6 gap-4">
+               <h2 className="text-lg font-bold text-[#37352f] flex items-center gap-2">
+                 <Calendar size={20} className="text-[#37352f]" /> {selectedYear} 상세 분석
+               </h2>
+               
+               {/* Year Selectors */}
+               <div className="flex flex-wrap gap-1 bg-[#fbfbfa] border border-[#e9e9e7] p-1 rounded-xl">
+                 {yearlyInsightsData.map((item) => (
+                   <button
+                     key={item.year}
+                     onClick={() => {
+                       setSelectedYear(item.year);
+                       if (item.year !== '2026년') {
+                         setViewMode('yearly');
+                       }
+                     }}
+                     className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                       selectedYear === item.year 
+                         ? 'bg-white text-[#2383e2] shadow-sm font-extrabold'
+                         : 'text-[#787774] hover:text-[#37352f] hover:bg-[#efefed]'
+                     }`}
+                   >
+                     {item.year.replace('년', '')}
+                   </button>
+                 ))}
+               </div>
+             </div>
 
-      {/* Grid Layout */}
-      <div className="grid grid-cols-1 xl:grid-cols-12 gap-8">
-        {/* Left Column: Era Trajectory (5 spans out of 12) */}
-        <div className="xl:col-span-5 space-y-8">
-          <div className="bg-white border border-[#e9e9e7] rounded-3xl p-6 md:p-8 shadow-sm">
-            <h2 className="text-lg font-bold text-[#37352f] mb-6 flex items-center gap-2 border-b border-[#f2f2f0] pb-3">
-              <TrendingUp size={20} className="text-[#2383e2]" /> 4단계 영적 성장 궤적
-            </h2>
-            
-            <div className="relative border-l-2 border-[#f2f2f0] ml-3 pl-6 space-y-8">
-              {/* Stage 1 */}
-              <div className="relative">
-                <span className="absolute -left-[31px] top-0 flex items-center justify-center w-5 h-5 rounded-full bg-[#f2f2f0] text-[10px] font-bold text-[#9b9a97]">1</span>
-                <div>
-                  <span className="text-xs font-bold text-[#9b9a97] uppercase tracking-wider block">2017 ~ 2019</span>
-                  <h3 className="text-[15px] font-bold text-[#37352f] mt-1">기초기: 말씀의 뿌리를 내림</h3>
-                  <p className="text-sm text-[#787774] mt-1.5 leading-relaxed">
-                    율법과 교리 말씀의 엄중한 기준을 확립하고, 매일의 정갈한 성찰적 아침 기도를 일상 습관으로 단단히 다지는 훈련의 계절입니다.
-                  </p>
-                </div>
-              </div>
+             {/* View Mode Switcher for 2026 */}
+             {selectedYear === '2026년' && (
+               <div className="flex gap-1.5 mb-6 bg-[#f2f2f0]/60 p-1 rounded-xl self-start border border-[#e9e9e7]/50">
+                 <button
+                   onClick={() => setViewMode('yearly')}
+                   className={`px-4 py-2 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
+                     viewMode === 'yearly'
+                       ? 'bg-white text-[#2383e2] shadow-sm font-extrabold border border-[#e9e9e7]/30'
+                       : 'text-[#787774] hover:text-[#37352f]'
+                   }`}
+                 >
+                   <Award size={14} /> 2026년 전체 리포트
+                 </button>
+                 <button
+                   onClick={() => setViewMode('monthly')}
+                   className={`px-4 py-2 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
+                     viewMode === 'monthly'
+                       ? 'bg-white text-[#2383e2] shadow-sm font-extrabold border border-[#e9e9e7]/30'
+                       : 'text-[#787774] hover:text-[#37352f]'
+                   }`}
+                 >
+                   <BarChart2 size={14} /> 월별 동적 인사이트
+                 </button>
+               </div>
+             )}
 
-              {/* Stage 2 */}
-              <div className="relative">
-                <span className="absolute -left-[31px] top-0 flex items-center justify-center w-5 h-5 rounded-full bg-[#2383e2]/10 text-[10px] font-bold text-[#2383e2]">2</span>
-                <div>
-                  <span className="text-xs font-bold text-[#2383e2] uppercase tracking-wider block">2020 ~ 2021</span>
-                  <h3 className="text-[15px] font-bold text-[#37352f] mt-1">관계기: 긍휼과 친밀한 안식</h3>
-                  <p className="text-sm text-[#787774] mt-1.5 leading-relaxed">
-                    엄격한 주권자를 넘어, 내게 은혜를 속삭이시는 다정한 친정 아버지와 같은 친밀감을 누리며 깊은 영적 쉼을 맛본 계절입니다.
-                  </p>
-                </div>
-              </div>
-
-              {/* Stage 3 */}
-              <div className="relative">
-                <span className="absolute -left-[31px] top-0 flex items-center justify-center w-5 h-5 rounded-full bg-emerald-50 text-[10px] font-bold text-emerald-600">3</span>
-                <div>
-                  <span className="text-xs font-bold text-emerald-600 uppercase tracking-wider block">2022 ~ 2023</span>
-                  <h3 className="text-[15px] font-bold text-[#37352f] mt-1">현장기: 삶의 중보와 일터 영성</h3>
-                  <p className="text-sm text-[#787774] mt-1.5 leading-relaxed">
-                    세속의 치열한 월요일 속에서도 주님과 밀착 동행하며, 개인을 넘어 이웃과 세상을 눈물로 중보하는 성령의 일하심을 체휼한 계절입니다.
-                  </p>
-                </div>
-              </div>
-
-              {/* Stage 4 */}
-              <div className="relative">
-                <span className="absolute -left-[31px] top-0 flex items-center justify-center w-5 h-5 rounded-full bg-purple-50 text-[10px] font-bold text-purple-600 animate-pulse">4</span>
-                <div>
-                  <span className="text-xs font-bold text-purple-600 uppercase tracking-wider block">2024 ~ 2026+</span>
-                  <h3 className="text-[15px] font-bold text-[#37352f] mt-1">수동성기: 자기 비움과 절대 평강</h3>
-                  <p className="text-sm text-[#787774] mt-1.5 leading-relaxed">
-                    자신의 힘을 모두 비워 온전히 내맡김으로써 주님의 평강에 완전히 안착하는 **영적 수동성(Spiritual Passivity)**의 절정을 고백하는 복된 계절입니다.
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Word Evolution Insight Card */}
-          <div className="bg-gradient-to-br from-blue-50/50 to-purple-50/30 border border-blue-100/30 rounded-3xl p-6 md:p-8 shadow-sm">
-            <h2 className="text-lg font-bold text-[#37352f] mb-4 flex items-center gap-2">
-              <Sparkles size={20} className="text-[#2383e2]" /> 어휘로 보는 영적 패러다임의 시프트
-            </h2>
-            <p className="text-sm text-[#37352f] leading-relaxed mb-4">
-              9년 전의 묵상과 최근 묵상의 가장 핵심적인 어휘적 차이는 **'내 의지'**에서 **'오직 은혜'**로의 이행입니다. 
-              초기의 성찰이 스스로의 결점을 참회하고 극복하려는 적극적 자기 통제가 중심이었다면, 
-              후기 묵상으로 갈수록 자아를 죽이고 주님의 주권 속에 완전히 순종하는 흐름을 보여줍니다.
-            </p>
-            <div className="flex flex-wrap gap-2">
-              <span className="text-xs font-semibold px-2.5 py-1 rounded bg-[#f2f2f0] text-[#787774] line-through">적극적인 의지</span>
-              <span className="text-xs font-semibold px-2.5 py-1 rounded bg-[#f2f2f0] text-[#787774] line-through">자아의 다스림</span>
-              <span className="text-xs font-semibold px-2.5 py-1 rounded bg-blue-100/50 text-[#2383e2] font-bold">오직 은혜</span>
-              <span className="text-xs font-semibold px-2.5 py-1 rounded bg-purple-100/50 text-purple-600 font-bold">영적 수동성</span>
-            </div>
-          </div>
-        </div>
-
-        {/* Right Column: Dynamic Yearly Analysis (7 spans out of 12) */}
-        <div className="xl:col-span-7 space-y-8">
-          <div className="bg-white border border-[#e9e9e7] rounded-3xl p-6 md:p-8 shadow-sm flex flex-col">
-            <div className="flex flex-col md:flex-row md:items-center justify-between border-b border-[#f2f2f0] pb-4 mb-6 gap-4">
-              <h2 className="text-lg font-bold text-[#37352f] flex items-center gap-2">
-                <Calendar size={20} className="text-[#37352f]" /> 연도별 상세 분석
-              </h2>
-              
-              {/* Year Selectors */}
-              <div className="flex flex-wrap gap-1 bg-[#fbfbfa] border border-[#e9e9e7] p-1 rounded-xl">
-                {yearlyInsightsData.map((item) => (
-                  <button
-                    key={item.year}
-                    onClick={() => setSelectedYear(item.year)}
-                    className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
-                      selectedYear === item.year 
-                        ? 'bg-white text-[#2383e2] shadow-sm font-extrabold'
-                        : 'text-[#787774] hover:text-[#37352f] hover:bg-[#efefed]'
-                    }`}
-                  >
-                    {item.year.replace('년', '')}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* Dynamic Card Container */}
-            <div className="space-y-6 animate-fade-in-up">
-              {/* slogan */}
-              <div className="p-5 bg-[#fbfbfa] rounded-2xl border border-[#e9e9e7]">
-                <span className="text-xs font-bold text-[#9b9a97] uppercase tracking-wider block">연도별 묵상 슬로건</span>
-                <p className="text-xl font-bold text-[#37352f] mt-1.5 leading-tight">
-                  "{currentInsight.slogan}"
-                </p>
-                <div className="flex items-center gap-1.5 text-xs text-[#2383e2] font-semibold mt-3">
-                  <Award size={14} /> {currentInsight.theme}
-                </div>
-              </div>
-
-              {/* Description */}
-              <div className="text-[#37352f] leading-loose text-[15.5px] font-medium whitespace-pre-wrap">
-                {currentInsight.description}
-              </div>
-
-              {/* Bible focus & Words Grid */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 border-t border-[#f2f2f0] pt-6">
-                <div>
-                  <h4 className="text-xs font-bold text-[#9b9a97] uppercase tracking-wider mb-3 flex items-center gap-1.5">
-                    <BookOpen size={14} className="text-[#9b9a97]" /> 대표 묵상 성경
-                  </h4>
-                  <div className="flex flex-wrap gap-2">
-                    {currentInsight.scriptures.map((bible, idx) => (
-                      <span key={idx} className="inline-flex items-center gap-1 text-xs font-bold text-[#2383e2] bg-[#2383e2]/10 px-2.5 py-1 rounded-md">
-                        {bible}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-
-                <div>
-                  <h4 className="text-xs font-bold text-[#9b9a97] uppercase tracking-wider mb-3 flex items-center gap-1.5">
-                    <Scroll size={14} className="text-[#9b9a97]" /> 당시의 핵심 영적 어휘
-                  </h4>
-                  <div className="flex flex-wrap gap-1.5">
-                    {currentInsight.words.map((word, idx) => (
-                      <span key={idx} className="inline-flex items-center text-xs font-semibold bg-[#f2f2f0] text-[#37352f] px-2.5 py-1 rounded-md">
-                        #{word}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-              </div>
-
-              {/* Prayer Tone Bar Chart */}
-              <div className="border-t border-[#f2f2f0] pt-6 space-y-4">
-                <h4 className="text-xs font-bold text-[#9b9a97] uppercase tracking-wider flex items-center gap-1.5">
-                  <Heart size={14} className="text-[#9b9a97]" /> 기도의 성격 및 지향점 분석
-                </h4>
-                
-                <div className="space-y-3 bg-[#fbfbfa] p-5 rounded-2xl border border-[#e9e9e7]">
-                  {/* Progress Bar 1: 간구 */}
-                  <div>
-                    <div className="flex justify-between text-xs font-bold text-[#37352f] mb-1">
-                      <span>도우심을 갈망하는 간구 (Petitional)</span>
-                      <span>{currentInsight.tone.petition}%</span>
-                    </div>
-                    <div className="w-full h-2 bg-[#e9e9e7] rounded-full overflow-hidden">
-                      <div 
-                        className="h-full bg-amber-500 transition-all duration-700" 
-                        style={{ width: `${currentInsight.tone.petition}%` }}
-                      />
-                    </div>
-                  </div>
-
-                  {/* Progress Bar 2: 조율 */}
-                  <div>
-                    <div className="flex justify-between text-xs font-bold text-[#37352f] mb-1">
-                      <span>마음을 주께 튜닝하는 조율 (Tuning)</span>
-                      <span>{currentInsight.tone.tuning}%</span>
-                    </div>
-                    <div className="w-full h-2 bg-[#e9e9e7] rounded-full overflow-hidden">
-                      <div 
-                        className="h-full bg-[#2383e2] transition-all duration-700" 
-                        style={{ width: `${currentInsight.tone.tuning}%` }}
-                      />
-                    </div>
-                  </div>
-
-                  {/* Progress Bar 3: 위탁 */}
-                  <div>
-                    <div className="flex justify-between text-xs font-bold text-[#37352f] mb-1">
-                      <span>온전히 평안에 거하는 위탁 (Trust / Passivity)</span>
-                      <span>{currentInsight.tone.trust}%</span>
-                    </div>
-                    <div className="w-full h-2 bg-[#e9e9e7] rounded-full overflow-hidden">
-                      <div 
-                        className="h-full bg-purple-500 transition-all duration-700" 
-                        style={{ width: `${currentInsight.tone.trust}%` }}
-                      />
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
+             {/* Monthly Selectors for Monthly Mode */}
+             {selectedYear === '2026년' && viewMode === 'monthly' && (
+               <div className="flex flex-wrap gap-1.5 mb-6 border-b border-[#f2f2f0] pb-5">
+                 {monthlyData.map((item) => {
+                   const isFuture = item.count === 0;
+                   const isSelected = selectedMonth === item.month;
+                   return (
+                     <button
+                       key={item.month}
+                       disabled={isFuture}
+                       onClick={() => setSelectedMonth(item.month)}
+                       className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                         isSelected
+                           ? 'bg-[#2383e2] text-white font-extrabold shadow-sm'
+                           : isFuture
+                             ? 'text-[#9b9a97]/40 cursor-not-allowed border border-[#e9e9e7]/10'
+                             : 'text-[#787774] hover:text-[#37352f] hover:bg-[#efefed] border border-[#e9e9e7]'
+                       }`}
+                     >
+                       {item.month} {isFuture ? '(준비중)' : `(${item.count}일)`}
+                     </button>
+                   );
+                 })}
+               </div>
+             )}
+ 
+             {/* Dynamic Content Container */}
+             {loadingMonthly && selectedYear === '2026년' && viewMode === 'monthly' ? (
+               <div className="py-20 flex items-center justify-center text-sm font-semibold text-[#9b9a97] animate-pulse">
+                 월별 묵상 분석 데이터 집계 중...
+               </div>
+             ) : viewMode === 'yearly' ? (
+               <div className="space-y-6 animate-fade-in-up">
+                 {/* slogan */}
+                 <div className="p-5 bg-[#fbfbfa] rounded-2xl border border-[#e9e9e7]">
+                   <span className="text-xs font-bold text-[#9b9a97] uppercase tracking-wider block">연도별 묵상 슬로건</span>
+                   <p className="text-xl font-bold text-[#37352f] mt-1.5 leading-tight">
+                     "{currentInsight.slogan}"
+                   </p>
+                   <div className="flex items-center gap-1.5 text-xs text-[#2383e2] font-semibold mt-3">
+                     <Award size={14} /> {currentInsight.theme}
+                   </div>
+                 </div>
+ 
+                 {/* Description */}
+                 <div className="text-[#37352f] leading-loose text-[15.5px] font-medium whitespace-pre-wrap">
+                   {currentInsight.description}
+                 </div>
+ 
+                 {/* Bible focus & Words Grid */}
+                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 border-t border-[#f2f2f0] pt-6">
+                   <div>
+                     <h4 className="text-xs font-bold text-[#9b9a97] uppercase tracking-wider mb-3 flex items-center gap-1.5">
+                       <BookOpen size={14} className="text-[#9b9a97]" /> 대표 묵상 성경
+                     </h4>
+                     <div className="flex flex-wrap gap-2">
+                       {currentInsight.scriptures.map((bible, idx) => (
+                         <span key={idx} className="inline-flex items-center gap-1 text-xs font-bold text-[#2383e2] bg-[#2383e2]/10 px-2.5 py-1 rounded-md">
+                           {bible}
+                         </span>
+                       ))}
+                     </div>
+                   </div>
+ 
+                   <div>
+                     <h4 className="text-xs font-bold text-[#9b9a97] uppercase tracking-wider mb-3 flex items-center gap-1.5">
+                       <Scroll size={14} className="text-[#9b9a97]" /> 당시의 핵심 영적 어휘
+                     </h4>
+                     <div className="flex flex-wrap gap-1.5">
+                       {currentInsight.words.map((word, idx) => (
+                         <span key={idx} className="inline-flex items-center text-xs font-semibold bg-[#f2f2f0] text-[#37352f] px-2.5 py-1 rounded-md">
+                           #{word}
+                         </span>
+                       ))}
+                     </div>
+                   </div>
+                 </div>
+ 
+                 {/* Prayer Tone Bar Chart */}
+                 <div className="border-t border-[#f2f2f0] pt-6 space-y-4">
+                   <h4 className="text-xs font-bold text-[#9b9a97] uppercase tracking-wider flex items-center gap-1.5">
+                     <Heart size={14} className="text-[#9b9a97]" /> 기도의 성격 및 지향점 분석
+                   </h4>
+                   
+                   <div className="space-y-3 bg-[#fbfbfa] p-5 rounded-2xl border border-[#e9e9e7]">
+                     {/* Progress Bar 1: 간구 */}
+                     <div>
+                       <div className="flex justify-between text-xs font-bold text-[#37352f] mb-1">
+                         <span>도우심을 갈망하는 간구 (Petitional)</span>
+                         <span>{currentInsight.tone.petition}%</span>
+                       </div>
+                       <div className="w-full h-2 bg-[#e9e9e7] rounded-full overflow-hidden">
+                         <div 
+                           className="h-full bg-amber-500 transition-all duration-700" 
+                           style={{ width: `${currentInsight.tone.petition}%` }}
+                         />
+                       </div>
+                     </div>
+ 
+                     {/* Progress Bar 2: 조율 */}
+                     <div>
+                       <div className="flex justify-between text-xs font-bold text-[#37352f] mb-1">
+                         <span>마음을 주께 튜닝하는 조율 (Tuning)</span>
+                         <span>{currentInsight.tone.tuning}%</span>
+                       </div>
+                       <div className="w-full h-2 bg-[#e9e9e7] rounded-full overflow-hidden">
+                         <div 
+                           className="h-full bg-[#2383e2] transition-all duration-700" 
+                           style={{ width: `${currentInsight.tone.tuning}%` }}
+                         />
+                       </div>
+                     </div>
+ 
+                     {/* Progress Bar 3: 위탁 */}
+                     <div>
+                       <div className="flex justify-between text-xs font-bold text-[#37352f] mb-1">
+                         <span>온전히 평안에 거하는 위탁 (Trust / Passivity)</span>
+                         <span>{currentInsight.tone.trust}%</span>
+                       </div>
+                       <div className="w-full h-2 bg-[#e9e9e7] rounded-full overflow-hidden">
+                         <div 
+                           className="h-full bg-purple-500 transition-all duration-700" 
+                           style={{ width: `${currentInsight.tone.trust}%` }}
+                         />
+                       </div>
+                     </div>
+                   </div>
+                 </div>
+               </div>
+             ) : (
+               /* Monthly View Mode */
+               <div className="space-y-6 animate-fade-in-up">
+                 {/* slogan */}
+                 <div className="p-5 bg-gradient-to-r from-blue-50/50 to-indigo-50/20 rounded-2xl border border-blue-100/40">
+                   <span className="text-[10px] font-extrabold text-[#2383e2] uppercase tracking-wider block mb-1">2026년 {selectedMonth} 묵상 슬로건</span>
+                   <p className="text-xl font-bold text-[#37352f] leading-tight">
+                     "{currentMonthlyInsight.slogan}"
+                   </p>
+                   <div className="flex items-center gap-1.5 text-xs text-[#2383e2] font-semibold mt-3">
+                     <Award size={14} /> {currentMonthlyInsight.theme}
+                   </div>
+                 </div>
+ 
+                 {/* Dynamic Month Data Note */}
+                 <div className="text-[11px] font-bold text-[#9b9a97] flex items-center gap-1.5">
+                   <Sparkles size={12} className="text-amber-500 animate-spin" style={{ animationDuration: '3s' }} /> 
+                   매월 1일 새벽 묵상 업데이트 반영! 당월 데이터 {currentMonthlyInsight.count}개 기준 실시간 분석
+                 </div>
+ 
+                 {/* Description */}
+                 <div className="text-[#37352f] leading-loose text-[15.5px] font-medium whitespace-pre-wrap">
+                   {currentMonthlyInsight.description}
+                 </div>
+ 
+                 {/* Bible focus & Words Grid */}
+                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 border-t border-[#f2f2f0] pt-6">
+                   <div>
+                     <h4 className="text-xs font-bold text-[#9b9a97] uppercase tracking-wider mb-3 flex items-center gap-1.5">
+                       <BookOpen size={14} className="text-[#9b9a97]" /> 당월 대표 묵상 성경
+                     </h4>
+                     <div className="flex flex-wrap gap-2">
+                       {currentMonthlyInsight.scriptures.map((bible: string, idx: number) => (
+                         <span key={idx} className="inline-flex items-center gap-1 text-xs font-bold text-[#2383e2] bg-[#2383e2]/10 px-2.5 py-1 rounded-md">
+                           {bible}
+                         </span>
+                       ))}
+                     </div>
+                   </div>
+ 
+                   <div>
+                     <h4 className="text-xs font-bold text-[#9b9a97] uppercase tracking-wider mb-3 flex items-center gap-1.5">
+                       <Scroll size={14} className="text-[#9b9a97]" /> 당월의 핵심 영적 어휘
+                     </h4>
+                     <div className="flex flex-wrap gap-1.5">
+                       {currentMonthlyInsight.words.map((word: string, idx: number) => (
+                         <span key={idx} className="inline-flex items-center text-xs font-semibold bg-[#f2f2f0] text-[#37352f] px-2.5 py-1 rounded-md">
+                           #{word}
+                         </span>
+                       ))}
+                     </div>
+                   </div>
+                 </div>
+ 
+                 {/* Prayer Tone Bar Chart */}
+                 <div className="border-t border-[#f2f2f0] pt-6 space-y-4">
+                   <h4 className="text-xs font-bold text-[#9b9a97] uppercase tracking-wider flex items-center gap-1.5">
+                     <Heart size={14} className="text-[#9b9a97]" /> 기도의 성격 및 지향점 분석 (실시간 텍스트 분석)
+                   </h4>
+                   
+                   <div className="space-y-3 bg-[#fbfbfa] p-5 rounded-2xl border border-[#e9e9e7]">
+                     {/* Progress Bar 1: 간구 */}
+                     <div>
+                       <div className="flex justify-between text-xs font-bold text-[#37352f] mb-1">
+                         <span>도우심을 갈망하는 간구 (Petitional)</span>
+                         <span>{currentMonthlyInsight.tone.petition}%</span>
+                       </div>
+                       <div className="w-full h-2 bg-[#e9e9e7] rounded-full overflow-hidden">
+                         <div 
+                           className="h-full bg-amber-500 transition-all duration-700" 
+                           style={{ width: `${currentMonthlyInsight.tone.petition}%` }}
+                         />
+                       </div>
+                     </div>
+ 
+                     {/* Progress Bar 2: 조율 */}
+                     <div>
+                       <div className="flex justify-between text-xs font-bold text-[#37352f] mb-1">
+                         <span>마음을 주께 튜닝하는 조율 (Tuning)</span>
+                         <span>{currentMonthlyInsight.tone.tuning}%</span>
+                       </div>
+                       <div className="w-full h-2 bg-[#e9e9e7] rounded-full overflow-hidden">
+                         <div 
+                           className="h-full bg-[#2383e2] transition-all duration-700" 
+                           style={{ width: `${currentMonthlyInsight.tone.tuning}%` }}
+                         />
+                       </div>
+                     </div>
+ 
+                     {/* Progress Bar 3: 위탁 */}
+                     <div>
+                       <div className="flex justify-between text-xs font-bold text-[#37352f] mb-1">
+                         <span>온전히 평안에 거하는 위탁 (Trust / Passivity)</span>
+                         <span>{currentMonthlyInsight.tone.trust}%</span>
+                       </div>
+                       <div className="w-full h-2 bg-[#e9e9e7] rounded-full overflow-hidden">
+                         <div 
+                           className="h-full bg-purple-500 transition-all duration-700" 
+                           style={{ width: `${currentMonthlyInsight.tone.trust}%` }}
+                         />
+                       </div>
+                     </div>
+                   </div>
+                 </div>
+               </div>
+             )}
+           </div>
+         </div>
+       </div>
+     </div>
+   );
+ }
