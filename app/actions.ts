@@ -267,11 +267,78 @@ export async function deleteMeditation(date: string) {
   }
 }
 
+async function generateInsightWithGemini(yearMonth: string, meditations: any[]) {
+  const apiKey = process.env.GEMINI_API_KEY;
+  if (!apiKey) return null;
+
+  try {
+    const meditationsText = meditations.map((m, idx) => {
+      return `[기록 ${idx + 1}] 날짜: ${m.date}, 본문: ${m.title}\n- 묵상내용: ${m.reflection || ''}\n- 기도문: ${m.prayer || ''}`;
+    }).join('\n\n');
+
+    const prompt = `당신은 장로님의 아침 묵상 기록을 종합 분석하여 매월 영적 분석 리포트를 작성하는 전문 신학자이자 목회자 AI 비서입니다.
+아래는 2026년 ${yearMonth.split('-')[1]}월 한 달 동안 장로님께서 작성하신 새벽 묵상 기록(성경 말씀 제목, 묵상 내용, 기도문) 목록입니다.
+이 기록들을 철저하게 분석하여, 장로님의 영적 흐름을 대표하는 리포트를 한국어로 작성해 주세요.
+
+[묵상 기록 목록]
+${meditationsText}
+
+응답은 반드시 아래 형식의 JSON 객체로만 출력해 주세요. 다른 설명 텍스트 없이 오직 JSON 문자열만 반환해야 합니다:
+{
+  "slogan": "한 달의 영적 핵심을 관통하는 함축적이고 깊이 있는 짧은 슬로건 (예: '말씀의 다정한 빛 아래 거하는 은혜')",
+  "theme": "성경 본문과 묵상의 핵심 방향을 나타내는 주제 한 줄 (예: '요한복음의 풍성한 평강과 자아 비움')",
+  "description": "장로님의 묵상 내용을 종합적으로 요약하고 은혜롭게 서술한 2~3문장의 상세 분석 리포트. 장로님이 묵상한 본문명(예: 고린도전서 등)과 핵심 고백을 포함하여 차분하고 영적인 어조로 작성해 주세요. 반드시 3인칭 경어체(예: '~묵상했습니다', '~확인했습니다', '~고백했습니다', '장로님께서 ~')를 사용해야 합니다.",
+  "words": ["핵심 영적 단어 4개"]
+}`;
+
+    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        contents: [{ parts: [{ text: prompt }] }],
+        generationConfig: {
+          responseMimeType: "application/json"
+        }
+      })
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error(`Gemini API error: ${response.status} ${response.statusText}`, errorText);
+      return null;
+    }
+
+    const data = await response.json();
+    const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
+    if (!text) {
+      console.error("Gemini returned empty content");
+      return null;
+    }
+
+    const parsed = JSON.parse(text.trim());
+    if (parsed.slogan && parsed.theme && parsed.description && Array.isArray(parsed.words)) {
+      return {
+        slogan: String(parsed.slogan),
+        theme: String(parsed.theme),
+        description: String(parsed.description),
+        words: parsed.words.map(String)
+      };
+    }
+    console.error("Gemini JSON structure is invalid:", parsed);
+    return null;
+  } catch (error) {
+    console.error("Error generating insight with Gemini:", error);
+    return null;
+  }
+}
+
 export async function get2026MonthlyInsights() {
   try {
     const result = await turso.execute("SELECT date, bible_book, title, reflection, prayer FROM meditations WHERE date LIKE '2026-%'");
     
-    const themes: { [key: string]: { slogan: string, theme: string, description: string, words: string[] } } = {
+    const fallbackThemes: { [key: string]: { slogan: string, theme: string, description: string, words: string[] } } = {
       "01": {
         slogan: "태초의 창조 질서와 언약적 동행",
         theme: "창세기를 열며 창조와 심판의 섭리 깨닫기",
@@ -303,16 +370,44 @@ export async function get2026MonthlyInsights() {
         words: ["텍스트", "콘텍스트", "실천", "이웃사랑"]
       },
       "06": {
-        slogan: "남은 반년을 기대하며 주의 선하심을 앙망함",
-        theme: "하반기 영적 도약을 위한 기도의 지경 확장",
-        description: "매월 1일 정기 업데이트 계획에 따라 정밀하고 은혜로운 하반기 분석 리포트가 대기 중입니다. 계속되는 장로님의 묵상 흔적을 따라 하나님의 신실하신 역사가 dynamic하게 추가될 예정입니다.",
-        words: ["하반기", "소망", "기대", "믿음"]
+        slogan: "십자가의 지혜로 세상을 이기고 거룩을 지키는 삶",
+        theme: "고린도전서를 통해 배운 십자가의 도 분별과 교회 공동체의 거룩함",
+        description: "6월 한 달간 고린도전서 전체를 깊이 묵상하며, 분열과 다툼이 가득한 세상 속에서 교회의 본질이자 유일한 기초이신 십자가에 달리신 그리스도를 붙들었습니다. 세상의 영리하고 효율적인 지혜 대신 어리석어 보이는 십자가의 도를 선택하고, 나 자신의 기쁨이나 자유보다는 믿음이 약한 지체들을 실족하게 하지 않으려는 사랑의 절제와 거룩한 삶의 실천을 다짐했습니다.",
+        words: ["십자가", "거룩", "사랑의절제", "공동체"]
       }
     };
-    
+
+    const dbInsightsMap: { [key: string]: { slogan: string, theme: string, description: string, words: string[] } } = {};
+    try {
+      const dbInsightsResult = await turso.execute("SELECT year_month, slogan, theme, description, words FROM monthly_insights WHERE year_month LIKE '2026-%'");
+      dbInsightsResult.rows.forEach(row => {
+        const ym = String(row.year_month || '');
+        const monthPart = ym.split('-')[1];
+        if (monthPart) {
+          try {
+            dbInsightsMap[monthPart] = {
+              slogan: String(row.slogan || ''),
+              theme: String(row.theme || ''),
+              description: String(row.description || ''),
+              words: JSON.parse(String(row.words || '[]'))
+            };
+          } catch (e) {
+            console.error("Error parsing db insight words:", e);
+          }
+        }
+      });
+    } catch (dbErr) {
+      console.warn("Could not load from monthly_insights table, falling back to static themes.", dbErr);
+    }
+
     const months = ["01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12"];
     
-    const monthlyData = months.map(m => {
+    // Get current date in KST (Korea Standard Time, UTC+9)
+    const now = new Date();
+    const kstTime = new Date(now.getTime() + (9 * 60 * 60 * 1000));
+    const currentYearMonth = kstTime.toISOString().substring(0, 7);
+
+    const monthlyDataPromises = months.map(async m => {
       const rows = result.rows.filter(x => String(x.date || '').substring(5, 7) === m);
       const count = rows.length;
       
@@ -371,12 +466,35 @@ export async function get2026MonthlyInsights() {
       
       const defaultTone = defaultTones[m] || defaultTones["default"];
       
-      const info = themes[m] || {
-        slogan: `${m}월의 소망과 동행`,
-        theme: `장로님의 ${m}월 매일 묵상 여정`,
-        description: `매월 1일 정기 분석에 따라 데이터가 동적으로 업데이트되는 ${m}월 분석 카드입니다. 장로님께서 올려드린 새벽 제단과 말씀이 기록되는 대로 자동 반영됩니다.`,
-        words: ["말씀", "기도", "은혜", "소망"]
-      };
+      const targetYearMonth = `2026-${m}`;
+      const isPastMonth = targetYearMonth < currentYearMonth;
+      
+      let info = dbInsightsMap[m] || fallbackThemes[m];
+      
+      if (!info && isPastMonth && count > 0 && process.env.GEMINI_API_KEY) {
+        const generated = await generateInsightWithGemini(targetYearMonth, rows);
+        if (generated) {
+          info = generated;
+          // Save to database cache
+          try {
+            await turso.execute({
+              sql: "INSERT OR REPLACE INTO monthly_insights (year_month, slogan, theme, description, words) VALUES (?, ?, ?, ?, ?)",
+              args: [targetYearMonth, info.slogan, info.theme, info.description, JSON.stringify(info.words)]
+            });
+          } catch (saveErr) {
+            console.error(`Failed to cache generated insight for ${targetYearMonth}:`, saveErr);
+          }
+        }
+      }
+      
+      if (!info) {
+        info = {
+          slogan: `${parseInt(m)}월의 소망과 동행`,
+          theme: `장로님의 ${parseInt(m)}월 매일 묵상 여정`,
+          description: `매월 1일 정기 분석에 따라 데이터가 동적으로 업데이트되는 ${parseInt(m)}월 분석 카드입니다. 장로님께서 올려드린 새벽 제단과 말씀이 기록되는 대로 자동 반영됩니다.`,
+          words: ["말씀", "기도", "은혜", "소망"]
+        };
+      }
       
       return {
         month: `${parseInt(m)}월`,
@@ -390,6 +508,7 @@ export async function get2026MonthlyInsights() {
       };
     });
     
+    const monthlyData = await Promise.all(monthlyDataPromises);
     return JSON.parse(JSON.stringify(monthlyData));
   } catch (error) {
     console.error("Error generating monthly insights:", error);
