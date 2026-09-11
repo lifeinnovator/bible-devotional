@@ -1,8 +1,9 @@
 'use client';
 
 import { useState } from 'react';
-import { PenLine, Book, Heart, BookOpen } from 'lucide-react';
+import { PenLine, Book, Heart, BookOpen, Wand2 } from 'lucide-react';
 import { saveMeditation } from '@/app/actions';
+import { parseRawMeditation } from '@/lib/meditation-parser';
 import { useRouter } from 'next/navigation';
 
 export default function WritePage() {
@@ -12,8 +13,19 @@ export default function WritePage() {
   const [scripture, setScripture] = useState('');  // 말씀 본문 (예: 1 여호와를 찬양하라!...)
   const [reflection, setReflection] = useState('');
   const [prayer, setPrayer] = useState('');
+  const [rawText, setRawText] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [message, setMessage] = useState('');
+
+  const handleAutoSplit = () => {
+    if (!rawText.trim()) return;
+    const parsed = parseRawMeditation(rawText);
+    setTitle(parsed.title);
+    setScripture(parsed.scripture);
+    setReflection(parsed.reflection);
+    setPrayer(parsed.prayer);
+    setRawText('');
+  };
 
   const handleSubmit = async () => {
     if (!title.trim() || !scripture.trim() || !reflection.trim()) {
@@ -74,6 +86,29 @@ export default function WritePage() {
       </header>
 
       <div className="space-y-6 max-w-4xl">
+        {/* Raw Paste & Auto-split */}
+        <div className="flex flex-col gap-1.5 p-4 bg-[#fbfbfa] border border-dashed border-[#e9e9e7] rounded-lg">
+          <label className="text-xs font-bold text-[#9b9a97] uppercase tracking-wider flex items-center gap-1">
+            <Wand2 size={14} className="text-[#2383e2]" /> 전체 메시지 붙여넣기 (자동 분리)
+          </label>
+          <textarea
+            placeholder="말씀 제목, 성경 본문, 묵상, 기도가 모두 포함된 전체 메시지를 여기에 붙여넣으세요..."
+            rows={4}
+            value={rawText}
+            onChange={(e) => setRawText(e.target.value)}
+            className="p-4 border border-[#e9e9e7] bg-white rounded-lg text-sm text-[#37352f] leading-relaxed focus:outline-none focus:border-[#2383e2] resize-y"
+          />
+          <div>
+            <button
+              onClick={handleAutoSplit}
+              disabled={!rawText.trim()}
+              className="px-4 py-2 bg-[#2383e2]/10 hover:bg-[#2383e2]/20 text-[#2383e2] font-bold text-xs rounded-lg transition-all cursor-pointer disabled:opacity-40 inline-flex items-center gap-1.5"
+            >
+              <Wand2 size={13} /> 자동 분리해서 아래 항목에 채우기
+            </button>
+          </div>
+        </div>
+
         {/* Date & Scripture Row */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="flex flex-col gap-1.5">
